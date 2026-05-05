@@ -1,0 +1,52 @@
+<%- include('partials/header') %>
+
+<div class="auth-wrapper">
+  <div class="card" style="border-top: 4px solid var(--bg-dark);">
+    <div class="auth-header">
+      <h1 style="font-family: var(--font-heading);"><%= isLogin ? 'Sign In' : 'Register' %></h1>
+      <p style="color: var(--text-muted); font-size: 0.9rem;"><%= isLogin ? 'Access your account to engage with judgments.' : 'Join the platform to share your legal perspective.' %></p>
+    </div>
+
+    <form action="<%= isLogin ? '/api/auth/login' : '/api/auth/register' %>" method="POST">
+      
+      <% if (!isLogin) { %>
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" name="name" class="input-control" required>
+        </div>
+      <% } %>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" class="input-control" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" class="input-control" required>
+      </div>
+
+      <% if (!isLogin) { %>
+        <div class="form-group">
+          <label for="role">Primary Role</label>
+          <select id="role" name="role" class="input-control">
+            <option value="public">Public Citizen</option>
+            <option value="lawyer">Lawyer / Advocate</option>
+          </select>
+        </div>
+      <% } %>
+
+      <button type="submit" class="btn btn-primary btn-block" style="padding: 1rem;"><%= isLogin ? 'Sign In' : 'Create Account' %></button>
+    </form>
+
+    <div style="text-align: center; margin-top: 2rem; border-top: 1px solid var(--border-light); padding-top: 1.5rem; font-size: 0.85rem;">
+      <% if (isLogin) { %>
+        <p>Don't have an account? <a href="/register" style="font-weight: 600;">Register here</a></p>
+      <% } else { %>
+        <p>Already registered? <a href="/login" style="font-weight: 600;">Sign in</a></p>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

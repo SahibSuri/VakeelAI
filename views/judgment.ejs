@@ -1,0 +1,147 @@
+<%- include('partials/header') %>
+
+<div style="margin-bottom: 2rem;">
+  <a href="/" class="btn">&larr; Back to Dashboard</a>
+</div>
+
+<div class="two-column-layout">
+  
+  <!-- Left Column: Judgment Content -->
+  <div class="column-divider">
+    <div class="detail-header">
+      <div class="detail-meta-bar">
+        <span><%= judgment.court %></span>
+        <span><%= new Date(judgment.dateOfJudgment).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %></span>
+        <% if (judgment.caseNumber) { %>
+          <span>Case No: <%= judgment.caseNumber %></span>
+        <% } %>
+        <span class="badge <%= judgment.verdict ? judgment.verdict.toLowerCase().replace(' ', '-') : 'unknown' %>"><%= judgment.verdict || 'Unknown' %></span>
+      </div>
+      
+      <h1><%= judgment.title %></h1>
+    </div>
+
+    <% if (judgment.parties && (judgment.parties.petitioner || judgment.parties.respondent)) { %>
+      <div class="parties-grid">
+        <div>
+          <span class="party-label">Petitioner</span>
+          <span class="party-name"><%= judgment.parties.petitioner || 'N/A' %></span>
+        </div>
+        <div class="vs">v.</div>
+        <div>
+          <span class="party-label">Respondent</span>
+          <span class="party-name"><%= judgment.parties.respondent || 'N/A' %></span>
+        </div>
+      </div>
+    <% } %>
+
+    <div class="content-block">
+      <h2>AI Summary & Analysis</h2>
+      <% if (judgment.aiSummary && judgment.aiSummary.text) { %>
+        <p><%= judgment.aiSummary.text %></p>
+      <% } else { %>
+        <p style="color: var(--text-muted); font-style: italic;">Detailed analysis is currently unavailable or pending generation.</p>
+      <% } %>
+    </div>
+
+    <% if (judgment.keyPoints && judgment.keyPoints.length > 0) { %>
+      <div class="content-block">
+        <h2>Key Takeaways</h2>
+        <ul style="margin-left: 1.5rem;">
+          <% judgment.keyPoints.forEach(point => { %>
+            <li style="margin-bottom: 0.5rem;"><%= point %></li>
+          <% }) %>
+        </ul>
+      </div>
+    <% } %>
+
+    <!-- Rating Section -->
+    <div class="rating-interactive">
+      <h3 style="font-family: var(--font-heading); margin-bottom: 0.5rem;">Public Rating: <%= judgment.avgRating > 0 ? judgment.avgRating : 'N/A' %> / 10</h3>
+      <p style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Based on <%= judgment.totalRatings %> ratings</p>
+      
+      <div class="user-rating-section" style="margin-top: 1.5rem;">
+        <% if (user) { %>
+          <div style="font-weight: 600; margin-bottom: 0.5rem;">Rate this judgment</div>
+          <div class="rating-stars" id="ratingWidget" data-judgment-id="<%= judgment._id %>">
+            <% for (let i = 1; i <= 10; i++) { %>
+              <button class="star-btn <%= (userRating && i <= userRating) ? 'active' : '' %>" data-value="<%= i %>">
+                ★
+              </button>
+            <% } %>
+          </div>
+          <p id="ratingMsg" style="font-size: 0.85rem; height: 20px;"></p>
+        <% } else { %>
+          <div style="background: var(--neutral-bg); padding: 1rem; text-align: center;">
+            <a href="/login" class="btn btn-sm">Log in to rate</a>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Column: Opinions / Reviews -->
+  <div>
+    <div class="card" style="border-top: 3px solid var(--border-dark);">
+      <h3 class="sidebar-title">Public Opinions (<%= judgment.totalReviews %>)</h3>
+
+      <% if (user) { %>
+        <form id="reviewForm" class="review-form" data-judgment-id="<%= judgment._id %>" style="margin-bottom: 2rem;">
+          <div class="form-group">
+            <label>Perspective</label>
+            <select name="perspectiveTag" class="input-control">
+              <option value="Citizen">Citizen</option>
+              <option value="Law Student">Law Student</option>
+              <option value="Lawyer">Lawyer</option>
+              <option value="Academic">Academic</option>
+              <option value="Journalist">Journalist</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Your Opinion</label>
+            <textarea name="body" class="input-control" rows="4" placeholder="Share your analysis..." required minlength="10"></textarea>
+          </div>
+          
+          <input type="hidden" name="rating" id="reviewRatingInput" value="<%= userRating || 5 %>">
+          
+          <button type="submit" class="btn btn-primary btn-block">Publish Opinion</button>
+          <p id="reviewMsg" style="font-size: 0.85rem; text-align: center; margin-top: 0.5rem;"></p>
+        </form>
+      <% } else { %>
+        <div style="background: var(--neutral-bg); padding: 1rem; text-align: center; margin-bottom: 2rem;">
+          <p style="margin-bottom: 1rem; font-size: 0.9rem;">Join the conversation</p>
+          <a href="/register" class="btn btn-primary btn-sm">Sign Up to Review</a>
+        </div>
+      <% } %>
+
+      <div>
+        <% if (reviews && reviews.length > 0) { %>
+          <% reviews.forEach(review => { %>
+            <div class="review-item">
+              <div class="review-meta">
+                <div>
+                  <span class="reviewer-name"><%= review.author ? review.author.name : 'Unknown' %></span>
+                  <span class="reviewer-tag"><%= review.perspectiveTag %></span>
+                </div>
+                <div class="review-rating">★ <%= review.rating %></div>
+              </div>
+              <div class="review-body">
+                <p><%= review.body %></p>
+              </div>
+              <div style="margin-top: 0.8rem; font-size: 0.8rem; color: var(--text-muted);">
+                <%= new Date(review.createdAt).toLocaleDateString() %>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">No opinions published yet. Be the first.</p>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<%- include('partials/footer') %>

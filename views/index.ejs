@@ -1,0 +1,129 @@
+<%- include('partials/header') %>
+
+<div class="two-column-layout">
+  <!-- Left Column: Primary Data Feeds -->
+  <div class="column-divider">
+    <div class="section-header">
+      <h1 class="section-title"><%= monthName %> <%= year %> — Notable Judgments</h1>
+      <span class="section-meta"><%= judgments.length %> judgments</span>
+    </div>
+    
+    <% if (judgments && judgments.length > 0) { %>
+      <% judgments.forEach(judgment => { %>
+        <a href="/judgment/<%= judgment._id %>" class="card card-hover judgment-card">
+          <div class="judgment-header">
+            <span class="court-name"><%= judgment.court %></span>
+            <span class="judgment-date"><%= new Date(judgment.dateOfJudgment).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %></span>
+          </div>
+          
+          <h2 class="judgment-title"><%= judgment.title %></h2>
+          
+          <div class="judgment-meta">
+            <% if (judgment.caseNumber) { %><%= judgment.caseNumber %> · <% } %>
+            <%= judgment.subject && judgment.subject.length ? judgment.subject.join(", ") : 'General Law' %>
+          </div>
+
+          <div class="judgment-footer">
+            <span class="badge <%= judgment.verdict ? judgment.verdict.toLowerCase().replace(' ', '-') : 'unknown' %>">
+              <%= judgment.verdict || 'Unknown Status' %>
+            </span>
+            
+            <div class="rating-summary">
+              <span class="stars">
+                <% const rating = judgment.avgRating || 0; %>
+                <% for(let i=1; i<=5; i++) { %>
+                  <% if (rating >= i * 2) { %>
+                    <i class="fa-solid fa-star"></i>
+                  <% } else if (rating >= (i * 2) - 1) { %>
+                    <i class="fa-solid fa-star-half-stroke"></i>
+                  <% } else { %>
+                    <i class="fa-regular fa-star"></i>
+                  <% } %>
+                <% } %>
+              </span>
+              <span class="score"><%= judgment.avgRating > 0 ? judgment.avgRating : 'N/A' %></span>
+              <span>(<%= judgment.totalRatings %> ratings)</span>
+            </div>
+
+            <span class="read-more">+ Read summary</span>
+          </div>
+        </a>
+      <% }) %>
+    <% } else { %>
+      <div class="card">
+        <p>There are no published judgments for <%= monthName %> <%= year %>.</p>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Right Column: Stats and Analytics -->
+  <div>
+    <div class="card">
+      <h3 class="sidebar-title">
+        <i class="fa-solid fa-chart-simple" style="color: #4285f4;"></i> 
+        <%= monthName %> <%= year %> — At a Glance
+      </h3>
+      <table class="stats-table">
+        <tbody>
+          <tr>
+            <td>Judgments this month</td>
+            <td><%= judgments.length %></td>
+          </tr>
+          <tr>
+            <td>Public opinions posted</td>
+            <td class="trend-up">↑ <%= judgments.reduce((acc, j) => acc + j.totalReviews, 0) %></td>
+          </tr>
+          <tr>
+            <td>Avg. public rating</td>
+            <td>
+              <% 
+                const rated = judgments.filter(j => j.avgRating > 0);
+                const avg = rated.length ? (rated.reduce((a, b) => a + b.avgRating, 0) / rated.length).toFixed(1) : 'N/A';
+              %>
+              <%= avg %> / 10
+            </td>
+          </tr>
+          <tr>
+            <td>Most discussed court</td>
+            <td>Supreme Court</td>
+          </tr>
+          <tr>
+            <td>Unique participants</td>
+            <td class="trend-up">↑ <%= Math.floor(Math.random() * 500) + 150 /* mockup data */ %></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3 class="sidebar-title">
+        <i class="fa-solid fa-fire" style="color: #ea4335;"></i> 
+        Most Discussed
+      </h3>
+      <ul class="trending-list">
+        <% 
+          const trending = [...judgments].sort((a, b) => b.totalReviews - a.totalReviews).slice(0, 3);
+        %>
+        <% if (trending.length > 0) { %>
+          <% trending.forEach((t, i) => { %>
+            <li class="trending-item">
+              <span class="trending-rank">0<%= i + 1 %></span>
+              <div class="trending-details">
+                <h4><a href="/judgment/<%= t._id %>"><%= t.title %></a></h4>
+                <p class="trending-meta"><%= t.totalRatings %> ratings · <%= t.totalReviews %> opinions</p>
+              </div>
+            </li>
+          <% }) %>
+        <% } else { %>
+          <li class="trending-item"><p class="trending-meta">No discussions yet.</p></li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="scroll-btn">
+  <i class="fa-solid fa-arrow-down"></i>
+</div>
+
+<%- include('partials/footer') %>

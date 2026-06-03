@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
           const res = await fetch(`/api/judgments/${judgmentId}/rate`, {
             method: 'POST',
+            credentials: 'same-origin',
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json'
@@ -99,6 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const res = await fetch(`/api/judgments/${judgmentId}/reviews`, {
           method: 'POST',
+          credentials: 'same-origin',
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'

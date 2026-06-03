@@ -1,0 +1,69 @@
+<%- include('../partials/header') %>
+
+<div style="margin-bottom: 2rem;">
+  <a href="/" class="btn">&larr; Back to Dashboard</a>
+</div>
+
+<div class="section-header">
+  <h1 class="section-title">All Judgments</h1>
+  <span class="section-meta"><%= total %> total</span>
+</div>
+
+<form method="get" action="/judgments" class="card" style="margin-bottom: 2rem; padding: 1rem;">
+  <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: end;">
+    <div class="form-group" style="margin: 0;">
+      <label>Court</label>
+      <select name="court" class="input-control">
+        <option value="">All courts</option>
+        <option value="Supreme Court of India" <%= filters.court === 'Supreme Court of India' ? 'selected' : '' %>>Supreme Court</option>
+        <option value="Delhi High Court" <%= filters.court === 'Delhi High Court' ? 'selected' : '' %>>Delhi High Court</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin: 0;">
+      <label>Sort by</label>
+      <select name="sort" class="input-control">
+        <option value="recent" <%= filters.sort === 'recent' ? 'selected' : '' %>>Most recent</option>
+        <option value="top_rated" <%= filters.sort === 'top_rated' ? 'selected' : '' %>>Top rated</option>
+        <option value="most_discussed" <%= filters.sort === 'most_discussed' ? 'selected' : '' %>>Most discussed</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+  </div>
+</form>
+
+<% if (judgments && judgments.length > 0) { %>
+  <% judgments.forEach(judgment => { %>
+    <a href="/judgment/<%= judgment._id %>" class="card card-hover judgment-card" style="display: block; margin-bottom: 1rem;">
+      <div class="judgment-header">
+        <span class="court-name"><%= judgment.court %></span>
+        <span class="judgment-date"><%= new Date(judgment.dateOfJudgment).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %></span>
+      </div>
+      <h2 class="judgment-title"><%= judgment.title %></h2>
+      <div class="judgment-footer">
+        <span class="badge <%= judgment.verdict ? judgment.verdict.toLowerCase().replace(' ', '-') : 'unknown' %>">
+          <%= judgment.verdict || 'Unknown' %>
+        </span>
+        <span class="score"><%= judgment.avgRating > 0 ? judgment.avgRating : 'N/A' %> / 10</span>
+        <span>(<%= judgment.totalRatings %> ratings · <%= judgment.totalReviews %> opinions)</span>
+      </div>
+    </a>
+  <% }) %>
+
+  <% if (pages > 1) { %>
+    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+      <% if (page > 1) { %>
+        <a href="/judgments?page=<%= page - 1 %>&sort=<%= filters.sort || 'recent' %><%= filters.court ? '&court=' + encodeURIComponent(filters.court) : '' %>" class="btn btn-sm">Previous</a>
+      <% } %>
+      <% if (page < pages) { %>
+        <a href="/judgments?page=<%= page + 1 %>&sort=<%= filters.sort || 'recent' %><%= filters.court ? '&court=' + encodeURIComponent(filters.court) : '' %>" class="btn btn-sm">Next</a>
+      <% } %>
+    </div>
+  <% } %>
+<% } else { %>
+  <div class="card">
+    <p>No published judgments match your filters.</p>
+    <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">Run <code>node scripts/seedJudgments.js</code> to add sample data.</p>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

@@ -35,25 +35,51 @@
       </div>
     <% } %>
 
-    <div class="content-block">
-      <h2>AI Summary & Analysis</h2>
-      <% if (judgment.aiSummary && judgment.aiSummary.text) { %>
-        <p><%= judgment.aiSummary.text %></p>
-      <% } else { %>
-        <p style="color: var(--text-muted); font-style: italic;">Detailed analysis is currently unavailable or pending generation.</p>
-      <% } %>
+    <!-- AI Summary Section -->
+<% if (judgment.aiSummary && judgment.aiSummary.text) { %>
+
+  <div class="ai-summary-box">
+    <div class="ai-label">
+      ◈ AI Generated Summary
+      <span class="ai-date">
+        <%= new Date(judgment.aiSummary.generatedAt).toDateString() %>
+      </span>
     </div>
 
+    <p class="summary-text"><%= judgment.aiSummary.text %></p>
+
     <% if (judgment.keyPoints && judgment.keyPoints.length > 0) { %>
-      <div class="content-block">
-        <h2>Key Takeaways</h2>
-        <ul style="margin-left: 1.5rem;">
+      <div class="key-points">
+        <h4>Key Takeaways</h4>
+        <ul>
           <% judgment.keyPoints.forEach(point => { %>
-            <li style="margin-bottom: 0.5rem;"><%= point %></li>
+            <li><%= point %></li>
           <% }) %>
         </ul>
       </div>
     <% } %>
+
+    <% if (judgment.precedentsCited && judgment.precedentsCited.length > 0) { %>
+      <div class="precedents">
+        <h4>Cases Referenced</h4>
+        <% judgment.precedentsCited.forEach(c => { %>
+          <span class="case-chip"><%= c %></span>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <p class="disclaimer">
+      ⚠️ AI-generated summary. Verify against original judgment before use.
+    </p>
+  </div>
+
+<% } else { %>
+
+  <div class="no-summary">
+    <p>Summary not yet generated for this judgment.</p>
+  </div>
+
+<% } %>
 
     <!-- Rating Section -->
     <div class="rating-interactive">

@@ -54,6 +54,8 @@ const judgmentSchema = new mongoose.Schema(
     avgRating: { type: Number, default: 0 },
     totalRatings: { type: Number, default: 0 },
     totalReviews: { type: Number, default: 0 },
+    legalIssues: [String],
+    significance: String,
 
     isPublished: { type: Boolean, default: true },
     isFeatured: { type: Boolean, default: false },

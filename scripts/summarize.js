@@ -44,7 +44,7 @@ async function generateAISummary(judgmentId) {
                   
                     "legalIssues": ["Issue 1 the court decided", "Issue 2"],
                   
-                    "verdict": "one of: Upheld / Overruled / Modified / Dismissed / Allowed / Partially Allowed",
+                    ""verdict": "one of: Upheld / Overruled / Modified / Dismissed / Allowed / Partially Allowed / Reaffirmed / N/A / Other"",
                   
                     "significance": "2-3 sentences on why this judgment matters for Indian law going forward"
                   }

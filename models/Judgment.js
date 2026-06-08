@@ -27,7 +27,18 @@ const judgmentSchema = new mongoose.Schema(
     subject: [String],        // e.g. ["Criminal Law", "Article 21"]
     verdict: {
       type: String,
-      enum: ["Upheld", "Overruled", "Modified", "Dismissed", "Allowed", "Partially Allowed"],
+      enum: [
+        "Upheld",
+        "Overruled", 
+        "Modified",
+        "Dismissed",
+        "Allowed",
+        "Partially Allowed",
+        "Reaffirmed",
+        "N/A",
+        "Other"
+      ],
+      default: "Other"
     },
 
     // ─── Content ──────────────────────────────────────────────────────────────
@@ -64,7 +75,9 @@ const judgmentSchema = new mongoose.Schema(
     sourceId: String,         // indiankanoon doc ID
     sourceName: { type: String, default: "IndianKanoon" },
   },
-  { timestamps: true }
+  { timestamps: true },
+  {citedCases:   [{ tid: String, title: String }]},
+  {citedByCases: [{ tid: String, title: String }]},
 );
 
 // ─── Indexes for fast filtering ───────────────────────────────────────────────

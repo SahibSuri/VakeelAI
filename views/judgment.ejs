@@ -34,6 +34,23 @@
         </div>
       </div>
     <% } %>
+  <!-- Significance badge -->
+<% if (judgment.significance) { %>
+  <div class="significance-box">
+    <h4>⚖️ Why This Judgment Matters</h4>
+    <p><%= judgment.significance %></p>
+  </div>
+<% } %>
+
+<!-- Legal Issues -->
+<% if (judgment.legalIssues && judgment.legalIssues.length > 0) { %>
+  <div class="legal-issues">
+    <h4>Legal Issues Decided</h4>
+    <% judgment.legalIssues.forEach(issue => { %>
+      <span class="issue-chip"><%= issue %></span>
+    <% }) %>
+  </div>
+<% } %>
 
     <!-- AI Summary Section -->
 <% if (judgment.aiSummary && judgment.aiSummary.text) { %>
@@ -80,6 +97,40 @@
   </div>
 
 <% } %>
+
+<!-- Cases this judgment cited -->
+<% if (judgment.citedCases && judgment.citedCases.length > 0) { %>
+  <div class="citations-box">
+    <h4>Cases Referenced in This Judgment</h4>
+    <% judgment.citedCases.forEach(c => { %>
+      <a href="https://indiankanoon.org/doc/<%= c.tid %>/" 
+         target="_blank" class="case-chip">
+        <%= c.title %>
+      </a>
+    <% }) %>
+  </div>
+<% } %>
+
+<!-- Cases that cited this judgment -->
+<% if (judgment.citedByCases && judgment.citedByCases.length > 0) { %>
+  <div class="citations-box">
+    <h4>Later Cases That Cited This Judgment</h4>
+    <% judgment.citedByCases.forEach(c => { %>
+      <a href="https://indiankanoon.org/doc/<%= c.tid %>/" 
+         target="_blank" class="case-chip">
+        <%= c.title %>
+      </a>
+    <% }) %>
+  </div>
+<% } %>
+
+<!-- IndianKanoon attribution — required by their terms -->
+<div class="ik-attribution">
+  <span>Source: </span>
+  <a href="<%= judgment.fullTextUrl %>" target="_blank">
+    View original on IndianKanoon
+  </a>
+</div>
 
     <!-- Rating Section -->
     <div class="rating-interactive">

@@ -1,0 +1,249 @@
+<%- include('partials/header') %>
+
+<%
+  const hasResult = result && typeof result === 'object';
+  const summaryText = hasResult ? (result.summary || result.text || result.aiSummary || '') : '';
+  const keyPoints = hasResult ? (result.keyPoints || result.key_points || result.keyTakeaways || result.takeaways || []) : [];
+  const significance = hasResult ? (result.significance || result.whyItMatters || result.why_this_matters || '') : '';
+  const originalTextValue = typeof originalText !== 'undefined' ? originalText : '';
+  const urlValue = typeof url !== 'undefined' ? url : '';
+%>
+
+<style>
+  .summarize-shell {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .summarize-header {
+    border-bottom: 2px solid var(--border-dark);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .summarize-kicker {
+    color: var(--accent-gold);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .summarize-header h1 {
+    font-size: clamp(2.1rem, 5vw, 3.5rem);
+    margin-bottom: 0.75rem;
+  }
+
+  .summarize-header p {
+    color: var(--text-muted);
+    font-size: 1rem;
+    max-width: 720px;
+  }
+
+  .summarize-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  .summarize-form-card,
+  .summarize-result-card,
+  .summarize-note-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    padding: 1.5rem;
+  }
+
+  .summarize-form-card textarea {
+    min-height: 280px;
+    resize: vertical;
+    line-height: 1.7;
+  }
+
+  .field-help {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 0.4rem;
+  }
+
+  .form-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin: 1.5rem 0;
+  }
+
+  .form-divider::before,
+  .form-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-light);
+  }
+
+  .error-message {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border: 1px solid rgba(197, 34, 31, 0.18);
+    padding: 0.9rem 1rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+
+  .result-section + .result-section {
+    border-top: 1px solid var(--border-light);
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+  }
+
+  .result-section h2,
+  .result-section h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .summary-output {
+    white-space: pre-line;
+    color: var(--text-main);
+    line-height: 1.8;
+  }
+
+  .key-point-list {
+    padding-left: 1.2rem;
+  }
+
+  .key-point-list li {
+    margin-bottom: 0.7rem;
+    line-height: 1.6;
+  }
+
+  .summarize-note-card {
+    border-top: 3px solid var(--accent-gold);
+  }
+
+  .summarize-note-card h3 {
+    font-size: 1.15rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .summarize-note-card p,
+  .summarize-note-card li {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+  }
+
+  .summarize-note-card ul {
+    padding-left: 1.1rem;
+    margin-top: 0.75rem;
+  }
+
+  .empty-result {
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  @media (max-width: 900px) {
+    .summarize-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="summarize-shell">
+  <div style="margin-bottom: 1.5rem;">
+    <a href="/" class="btn">&larr; Back to Dashboard</a>
+  </div>
+
+  <header class="summarize-header">
+    <div class="summarize-kicker">AI Judgment Summarizer</div>
+    <h1>Summarize Any Judgment</h1>
+    <p>Paste judgment text or submit an IndianKanoon document link to generate a concise summary, key points, and legal significance.</p>
+  </header>
+
+  <div class="summarize-grid">
+    <section class="summarize-form-card">
+      <% if (error) { %>
+        <div class="error-message"><%= error %></div>
+      <% } %>
+
+      <form action="/summarize" method="POST">
+        <div class="form-group">
+          <label for="text">Judgment Text</label>
+          <textarea id="text" name="text" class="input-control" rows="14" placeholder="Paste the full judgment text here..."><%= originalTextValue %></textarea>
+          <p class="field-help">Use this when you already have the judgment text copied from a PDF, court site, or database.</p>
+        </div>
+
+        <div class="form-divider">or</div>
+
+        <div class="form-group">
+          <label for="url">IndianKanoon URL</label>
+          <input id="url" name="url" type="url" class="input-control" placeholder="https://indiankanoon.org/doc/123456/" value="<%= urlValue %>">
+          <p class="field-help">IndianKanoon document links should include <strong>/doc/</strong> followed by the document ID.</p>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          <i class="fa-solid fa-wand-magic-sparkles" style="margin-right: 0.5rem;"></i>
+          Generate Summary
+        </button>
+      </form>
+    </section>
+
+    <aside class="summarize-note-card">
+      <h3>What You Will Get</h3>
+      <p>The result is organized for quick legal reading and review.</p>
+      <ul>
+        <li>A readable summary of facts, issues, reasoning, and decision.</li>
+        <li>Key points for scanning the judgment quickly.</li>
+        <li>A short note on why the judgment matters.</li>
+      </ul>
+    </aside>
+  </div>
+
+  <section class="summarize-result-card" style="margin-top: 2rem;">
+    <% if (hasResult) { %>
+      <div class="result-section">
+        <h2>Summary</h2>
+        <% if (summaryText) { %>
+          <p class="summary-output"><%= summaryText %></p>
+        <% } else { %>
+          <p class="empty-result">No summary was returned.</p>
+        <% } %>
+      </div>
+
+      <div class="result-section">
+        <h3>Key Points</h3>
+        <% if (Array.isArray(keyPoints) && keyPoints.length > 0) { %>
+          <ul class="key-point-list">
+            <% keyPoints.forEach(point => { %>
+              <li><%= point %></li>
+            <% }) %>
+          </ul>
+        <% } else if (typeof keyPoints === 'string' && keyPoints.trim()) { %>
+          <p class="summary-output"><%= keyPoints %></p>
+        <% } else { %>
+          <p class="empty-result">No key points were returned.</p>
+        <% } %>
+      </div>
+
+      <div class="result-section">
+        <h3>Significance</h3>
+        <% if (significance) { %>
+          <p class="summary-output"><%= significance %></p>
+        <% } else { %>
+          <p class="empty-result">No significance note was returned.</p>
+        <% } %>
+      </div>
+    <% } else { %>
+      <p class="empty-result">Submit judgment text or an IndianKanoon URL to see the summary, key points, and significance here.</p>
+    <% } %>
+  </section>
+</div>
+
+<%- include('partials/footer') %>

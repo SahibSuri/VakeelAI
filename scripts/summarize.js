@@ -27,11 +27,16 @@ async function generateAISummary(judgmentId) {
 
   // 3. Build the prompt
   const prompt = `You are a senior Indian legal analyst writing for a legal news platform read by lawyers, law students, and educated citizens.
-                  
+
                   Analyze the following court judgment and respond ONLY in this exact JSON format with no extra text outside the JSON:
                   {
-                    "summary": "Write a detailed 4-6 paragraph summary covering: (1) Background and facts of the case - who the parties are and what dispute arose, (2) Arguments made by each side, (3) Legal issues the court had to decide, (4) The court's reasoning and analysis, (5) Final decision and order, (6) Significance of this judgment for Indian law. Each paragraph should be 3-4 sentences. Write clearly so a law student can understand without losing legal accuracy.",
-                  
+                    "summary": "Write a detailed 6-10 paragraph summary covering the background and facts, arguments from each side, legal issues, court reasoning, final decision, and significance. Each paragraph should be 3-4 sentences. , 
+                    also make sure to mention the case number and the date of the judgment. Also mention the parties and the bench of the court. make sure the result is organized for a quick legal reading and review so that a lawyer can get an idea of what's the case about if reading first time or can get a quick revision if somone wants to read the case or the judgement again" , 
+                       A readable summary of facts, issues, reasoning, and decision.
+                       Key points for scanning the judgment quickly.
+                       A short note on why the judgment matters.,
+                       also in the last give some important implications of the judgment for the future.,
+                       also make sure to provide some important learning points for the law students and the lawyers and those preparing for the exams and those who are interested in the law and the judiciary.
                     "keyPoints": [
                       "Key legal principle 1 established or reaffirmed",
                       "Key legal principle 2",
@@ -39,23 +44,19 @@ async function generateAISummary(judgmentId) {
                       "Key legal principle 4",
                       "Key legal principle 5"
                     ],
-                  
                     "precedentsCited": ["Only case names explicitly mentioned in the text"],
-                  
                     "legalIssues": ["Issue 1 the court decided", "Issue 2"],
-                  
-                    ""verdict": "one of: Upheld / Overruled / Modified / Dismissed / Allowed / Partially Allowed / Reaffirmed / N/A / Other"",
-                  
+                    "verdict": "one of: Upheld / Overruled / Modified / Dismissed / Allowed / Partially Allowed / Reaffirmed / N/A / Other",
                     "significance": "2-3 sentences on why this judgment matters for Indian law going forward"
                   }
-                  
+
                   STRICT RULES:
                   - Never fabricate any case name, citation, or fact not present in the text
                   - For precedentsCited return [] if no cases are mentioned
                   - Write the summary in formal but readable English
                   - keyPoints must be actual legal takeaways a lawyer can use, not just descriptions of what happened
                   - significance should explain real-world impact on future cases
-                  
+
                   JUDGMENT TEXT:
                   ${text}`;
 

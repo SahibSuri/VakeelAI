@@ -45,12 +45,17 @@ async function fetchFullDoc(tid) {
 // ─── Map IndianKanoon court code to your enum ─────────────────────────────────
 function mapCourt(docsource = "") {
   const src = docsource.toLowerCase();
-  if (src.includes("supremecourt")) return "Supreme Court of India";
-  if (src.includes("delhi"))        return "Delhi High Court";
-  if (src.includes("bombay"))       return "Bombay High Court";
-  if (src.includes("chennai"))      return "Madras High Court";
-  if (src.includes("kolkata"))      return "Calcutta High Court";
-  if (src.includes("allahabad"))    return "Allahabad High Court";
+  if (src.includes("supremecourt"))  return "Supreme Court of India";
+  if (src.includes("delhi") && !src.includes("delhidc")) return "Delhi High Court";
+  if (src.includes("bombay"))        return "Bombay High Court";
+  if (src.includes("chennai") || src.includes("madras")) return "Madras High Court";
+  if (src.includes("kolkata") || src.includes("calcutta")) return "Calcutta High Court";
+  if (src.includes("allahabad"))     return "Allahabad High Court";
+  if (src.includes("karnataka"))     return "Karnataka High Court";
+  if (src.includes("kerala"))        return "Kerala High Court";
+  if (src.includes("gujarat"))       return "Gujarat High Court";
+  if (src.includes("punjab"))        return "Punjab & Haryana High Court";
+  if (src.includes("patna"))         return "Patna High Court";
   return "Other";
 }
 

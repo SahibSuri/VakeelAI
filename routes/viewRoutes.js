@@ -23,6 +23,38 @@ const isLoggedIn = (req, res, next) => {
   res.redirect("/login");
 };
 
+const buildPrompt = (text) => `You are a senior Indian legal analyst writing for a legal news platform read by lawyers, law students, and educated citizens.
+
+Analyze the following court judgment and respond ONLY in this exact JSON format with no extra text outside the JSON:
+{
+  "summary": "Write a detailed 6-10 paragraph summary covering the background and facts, arguments from each side, legal issues, court reasoning, final decision, and significance. Each paragraph should be 3-4 sentences. , 
+  also make sure to mention the case number and the date of the judgment. Also mention the parties and the bench of the court. make sure the result is organized for a quick legal reading and review so that a lawyer can get an idea of what's the case about if reading first time or can get a quick revision if somone wants to read the case or the judgement again" , 
+     A readable summary of facts, issues, reasoning, and decision.
+     Key points for scanning the judgment quickly.
+     A short note on why the judgment matters.
+  "keyPoints": [
+    "Key legal principle 1 established or reaffirmed",
+    "Key legal principle 2",
+    "Key legal principle 3",
+    "Key legal principle 4",
+    "Key legal principle 5"
+  ],
+  "precedentsCited": ["Only case names explicitly mentioned in the text"],
+  "legalIssues": ["Issue 1 the court decided", "Issue 2"],
+  "verdict": "one of: Upheld / Overruled / Modified / Dismissed / Allowed / Partially Allowed / Reaffirmed / N/A / Other",
+  "significance": "2-3 sentences on why this judgment matters for Indian law going forward"
+}
+
+STRICT RULES:
+- Never fabricate any case name, citation, or fact not present in the text
+- For precedentsCited return [] if no cases are mentioned
+- Write the summary in formal but readable English
+- keyPoints must be actual legal takeaways a lawyer can use, not just descriptions of what happened
+- significance should explain real-world impact on future cases
+
+JUDGMENT TEXT:
+${text}`;
+
 // ─── HOME ─────────────────────────────────────────────────────────────────────
 router.get("/", async (req, res) => {
   try {
@@ -196,6 +228,76 @@ router.post("/judgment/:id/reviews", isLoggedIn, async (req, res) => {
     }
     console.error(err);
     res.redirect(`/judgment/${req.params.id}`);
+  }
+});
+
+// GET /summarize — show the form
+router.get("/summarize", (req, res) => {
+  res.render("summarize", { 
+    title: "Summarize Any Judgment",
+    result: null,
+    error: null 
+  });
+});
+
+// POST /summarize — process and return summary
+router.post("/summarize", async (req, res) => {
+  try {
+    const { text, url } = req.body;
+    let rawText = text;
+
+    // If URL provided, fetch from IndianKanoon
+    if (url && url.includes("indiankanoon.org/doc/")) {
+      const tid = url.match(/\/doc\/(\d+)/)?.[1];
+      if (tid) {
+        const apiRes = await fetch(`https://api.indiankanoon.org/doc/${tid}/`, {
+          method: "POST",
+          headers: { "Authorization": `Token ${process.env.INDIANKANOON_API_KEY}` }
+        });
+        const data = await apiRes.json();
+        rawText = data.doc || "";
+      }
+    }
+
+    if (!rawText || rawText.trim().length < 100) {
+      return res.render("summarize", { 
+        title: "Summarize Any Judgment",
+        result: null, 
+        error: "Please provide valid judgment text or URL" 
+      });
+    }
+
+    // Truncate if too long
+    const text_to_summarize = rawText.length > 12000
+      ? rawText.slice(0, 6000) + "\n...\n" + rawText.slice(-6000)
+      : rawText;
+
+    // Call OpenAI
+    const OpenAI = require("openai");
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: buildPrompt(text_to_summarize) }],
+      temperature: 0.2,
+      response_format: { type: "json_object" }
+    });
+
+    const result = JSON.parse(response.choices[0].message.content);
+
+    res.render("summarize", { 
+      title: "Summarize Any Judgment",
+      result, 
+      error: null 
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.render("summarize", { 
+      title: "Summarize Any Judgment",
+      result: null, 
+      error: "Something went wrong. Please try again." 
+    });
   }
 });
 
